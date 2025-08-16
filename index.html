@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFA Builder Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- First Page -->
+    <div id="firstPage">
+        <h1>DFA Builder Game</h1>
+        <button id="buildBtn">Build DFA</button>
+        <button id="playBtn">Walk DFA</button>
+
+    </div>
+
+    <!-- Game Page -->
+    <div id="gamePage">
+        <div id="controls">
+            <button id="addStateBtn">Add State</button>
+            <button id="addTransitionBtn">Add Transition</button>
+            <button id="deleteStateBtn">Delete State</button>
+            <button id="deleteTransitionBtn">Delete Transition</button>
+            <button id="setStartBtn">Set Start State</button>
+            <button id="toggleFinalBtn">Set Final States</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+        <div id="dfaControls">
+            <button id="setAlphabetBtn">Set Alphabet</button>
+            <button id="newDFABtn">New DFA</button>
+            <select id="loadDFADropdown">
+                <option value="" disabled selected>Load DFA</option>
+            </select>
+            <button id="saveDFABtn">Save DFA</button>
+            <button id="deleteDFABtn">Delete DFA</button>
+        </div>
+
+        <canvas id="dfaCanvas" width="1000" height="600"></canvas>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>

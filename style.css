@@ -1,0 +1,147 @@
+/* General reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* First Page */
+#firstPage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #1f1c2c, #928dab);
+    color: #fff;
+    text-align: center;
+}
+
+#firstPage h1 {
+    font-size: 3rem;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#firstPage button {
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #ffb347;
+    background-image: linear-gradient(45deg, #ffb347 0%, #ffcc33 100%);
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+#firstPage button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Game Page */
+#gamePage {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: #121212;
+    min-height: 100vh;
+}
+
+#controls {
+    margin-bottom: 20px;
+}
+
+#controls button {
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #444;
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+#controls button:hover {
+    background: #666;
+    transform: scale(1.05);
+}
+
+/* Delete button in red */
+#deleteStateBtn {
+    background: #e74c3c;
+}
+
+#deleteStateBtn:hover {
+    background: #c0392b;
+}
+
+/* Canvas */
+#dfaCanvas {
+    border: 2px solid #fff;
+    border-radius: 10px;
+    background-color: #1a1a1a;
+    cursor: pointer;
+}
+
+#dfaControls {
+    position: absolute;
+    /* top-left corner */
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#dfaControls button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #ff6b6b;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+#dfaControls button:hover {
+    background-color: #ff8787;
+}
+
+#loadDFADropdown {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    background-color: #444;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+#loadDFADropdown:hover {
+    background-color: #666;
+}
+
+
+/* Responsive canvas */
+@media (max-width: 900px) {
+    #dfaCanvas {
+        width: 95%;
+        height: 400px;
+        margin: 0 auto;
+    }
+}
+
+button.active {
+    background-color: red !important;
+    color: white;
+    box-shadow: 0 0 10px red;
+}
