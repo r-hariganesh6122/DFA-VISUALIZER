@@ -145,3 +145,72 @@ button.active {
     color: white;
     box-shadow: 0 0 10px red;
 }
+
+#playCanvas {
+    border: 2px solid #fff;
+    border-radius: 10px;
+    background-color: #1a1a1a;
+    cursor: pointer;
+}
+
+#playPage {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: #121212;
+    min-height: 100vh;
+}
+
+#Pcontrols {
+    margin-bottom: 20px;
+}
+
+#Pcontrols button {
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #444;
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+#Pcontrols button:hover {
+    background: #666;
+    transform: scale(1.05);
+}
+
+#selectDFADropdown {
+    padding: 8px 12px;
+    margin: 5px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    background-color: #444;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+#selectDFADropdown:hover {
+    background-color: #666;
+}
+
+#inputString {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    background-color: #222;
+    color: #fff;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+#inputString:focus {
+    border-color: #ffb347;
+    box-shadow: 0 0 10px #ffb347;
+}

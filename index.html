@@ -41,6 +41,26 @@
         <canvas id="dfaCanvas" width="1000" height="600"></canvas>
     </div>
 
+    <!-- Walk Page -->
+    <div id="playPage">
+        <!-- Top controls -->
+        <div id="Pcontrols">
+            <select id="selectDFADropdown">
+                <option value="" disabled selected>Select DFA</option>
+            </select>
+            <input type="text" id="inputString" placeholder="Enter input string">
+            <button id="strDFA">Start DFA</button>
+            <button id="pauDFA">Pause DFA</button>
+            <button id="runDFA">Run DFA</button>
+        </div>
+
+        <!-- Canvas to visualize DFA traversal -->
+        <canvas id="playCanvas" width="1000" height="600"></canvas>
+
+        <!-- Result display -->
+        <div id="result" style="margin-top: 20px; color: #fff; font-size: 1.2rem;"></div>
+    </div>
+
 
     <script src="script.js"></script>
 </body>

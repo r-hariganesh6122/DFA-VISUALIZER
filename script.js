@@ -7,11 +7,6 @@ document.getElementById("buildBtn").addEventListener("click", () => {
     gamePage.style.display = "flex"; // so your CSS flex layout works
 });
 
-
-document.getElementById("playBtn").addEventListener("click", () => {
-    alert("Play DFA will be implemented later!");
-});
-
 // Modes
 let transitionMode = false;
 let deleteMode = false;
@@ -697,10 +692,21 @@ document.getElementById("saveDFABtn").addEventListener("click", () => {
     }
 
     savedDFAs[name] = {
-        states: states.map(s => ({ ...s })),
-        transitions: transitions.map(t => ({ ...t })),
-        alphabet: [...alphabet] // save current alphabet
+        states: states.map(s => ({
+            name: s.name,
+            x: s.x,
+            y: s.y,
+            isStart: s.isStart || false,
+            isFinal: s.isFinal || false
+        })),
+        transitions: transitions.map(t => ({
+            from: { name: t.from.name },
+            to: { name: t.to.name },
+            symbol: t.symbol
+        })),
+        alphabet: [...alphabet] // if you’re storing alphabet
     };
+
 
     // Save to localStorage
     localStorage.setItem("dfas", JSON.stringify(savedDFAs));
@@ -738,3 +744,358 @@ document.getElementById("deleteDFABtn").addEventListener("click", () => {
 // Initial draw
 drawAll();
 //yo
+
+
+//----------------------------------------WALKING THE DFA----------------------------------------------------------------
+
+const playPage = document.getElementById("playPage");
+const playDropdown = document.getElementById("selectDFADropdown");
+const playCanvas = document.getElementById("playCanvas");
+const playCtx = playCanvas.getContext("2d");
+
+let playStates = [];
+let playTransitions = [];
+let currentDFA = null;
+const PcurveGap = 30; //curve gap for reverse transition
+
+// Show play page and refresh saved DFAs
+document.getElementById("playBtn").addEventListener("click", () => {
+    firstPage.style.display = "none";
+    playPage.style.display = "flex";
+
+    savedDFAs = JSON.parse(localStorage.getItem("dfas") || "{}");
+    updatePlayDropdown();
+});
+
+// Populate dropdown
+function updatePlayDropdown() {
+    playDropdown.innerHTML = '<option value="" disabled selected>Select DFA</option>';
+    for (const name in savedDFAs) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        playDropdown.appendChild(option);
+    }
+}
+
+// ==== Draw Functions ====
+function drawPlayAll() {
+    playCtx.clearRect(0, 0, playCanvas.width, playCanvas.height);
+    drawPlayTransitions();
+    drawPlayStates();
+}
+
+function drawPlayStates() {
+    playStates.forEach(state => {
+        playCtx.beginPath();
+        playCtx.arc(state.x, state.y, 30, 0, Math.PI * 2);
+        playCtx.fillStyle = "#222";
+        playCtx.fill();
+        playCtx.strokeStyle = "#fff";
+        playCtx.lineWidth = 2;
+        playCtx.stroke();
+        playCtx.fillStyle = "#fff";
+        playCtx.font = "16px Arial";
+        playCtx.textAlign = "center";
+        playCtx.textBaseline = "middle";
+        playCtx.fillText(state.name, state.x, state.y);
+        // Start state arrow (before circle)
+        if (state.isStart) {
+            playCtx.strokeStyle = "green";
+            playCtx.lineWidth = 3;
+            playCtx.beginPath();
+            playCtx.moveTo(state.x - 50, state.y);
+            playCtx.lineTo(state.x - 30, state.y);
+            playCtx.stroke();
+            // Little arrow head
+            playCtx.beginPath();
+            playCtx.moveTo(state.x - 30, state.y);
+            playCtx.lineTo(state.x - 35, state.y - 5);
+            playCtx.lineTo(state.x - 35, state.y + 5);
+            playCtx.closePath();
+            playCtx.fillStyle = "green";
+            playCtx.fill();
+        }
+
+        // Final state double circle
+        if (state.isFinal) {
+            playCtx.strokeStyle = "#fff";
+            playCtx.lineWidth = 2;
+            playCtx.beginPath();
+            playCtx.arc(state.x, state.y, 25, 0, Math.PI * 2);
+            playCtx.stroke();
+        }
+
+    });
+}
+
+function drawPlayTransitions() {
+    // Group transitions by from->to pair
+    const grouped = {};
+
+    playTransitions.forEach(tr => {
+        const key = `${tr.from.name}->${tr.to.name}`;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(tr);
+    });
+
+    for (const key in grouped) {
+        const trs = grouped[key];
+        trs.forEach((tr, i) => {
+            const from = tr.from;
+            const to = tr.to;
+            const symbol = tr.symbol;
+
+            const dx = to.x - from.x;
+            const dy = to.y - from.y;
+            const angle = Math.atan2(dy, dx);
+
+            if (from === to) {
+                // === Self-loop ===
+                const radius = 20;
+                const loopOffsetY = 40;
+
+                playCtx.strokeStyle = "yellow";
+                playCtx.lineWidth = 2;
+                playCtx.beginPath();
+                playCtx.arc(from.x, from.y - loopOffsetY, radius, 0, Math.PI * 2);
+                playCtx.stroke();
+
+                // Arrowhead for self-loop
+                const angle = Math.PI / 4;
+                const arrowTipX = from.x + radius * Math.cos(angle);
+                const arrowTipY = from.y - loopOffsetY + radius * Math.sin(angle);
+                const dx = from.x - arrowTipX;
+                const dy = from.y - arrowTipY;
+                const arrowAngle = Math.atan2(dy, dx);
+                const arrowLength = 10;
+
+                playCtx.fillStyle = "yellow";
+                playCtx.beginPath();
+                playCtx.moveTo(arrowTipX, arrowTipY);
+                playCtx.lineTo(
+                    arrowTipX - arrowLength * Math.cos(arrowAngle - Math.PI / 6),
+                    arrowTipY - arrowLength * Math.sin(arrowAngle - Math.PI / 6)
+                );
+                playCtx.lineTo(
+                    arrowTipX - arrowLength * Math.cos(arrowAngle + Math.PI / 6),
+                    arrowTipY - arrowLength * Math.sin(arrowAngle + Math.PI / 6)
+                );
+                playCtx.closePath();
+                playCtx.fill();
+
+                // Label for self-loop
+                playCtx.fillStyle = "white";
+                playCtx.font = "16px Arial";
+                playCtx.textAlign = "center";
+                playCtx.fillText(symbol, from.x, from.y - loopOffsetY - radius - 10);
+            }
+            else {
+                const dx = to.x - from.x;
+                const dy = to.y - from.y;
+                const angle = Math.atan2(dy, dx);
+
+                const startX = from.x + 30 * Math.cos(angle);
+                const startY = from.y + 30 * Math.sin(angle);
+                const endX = to.x - 30 * Math.cos(angle);
+                const endY = to.y - 30 * Math.sin(angle);
+
+                // Reverse transition detection
+                let reverseCount = playTransitions.filter(t => t.from === to && t.to === from).length;
+
+                if (reverseCount > 0) {
+                    // === Curved line for reverse transition ===
+                    const midX = (startX + endX) / 2;
+                    const midY = (startY + endY) / 2;
+
+                    const perpX = -(endY - startY);
+                    const perpY = endX - startX;
+                    const length = Math.sqrt(perpX * perpX + perpY * perpY);
+                    const normX = (perpX / length) * PcurveGap * reverseCount;
+                    const normY = (perpY / length) * PcurveGap * reverseCount;
+
+                    playCtx.strokeStyle = "yellow";
+                    playCtx.lineWidth = 2;
+                    playCtx.beginPath();
+                    playCtx.moveTo(startX, startY);
+                    playCtx.quadraticCurveTo(midX + normX, midY + normY, endX, endY);
+                    playCtx.stroke();
+
+                    // Arrowhead for curve
+                    const arrowAngle = Math.atan2(endY - (midY + normY), endX - (midX + normX));
+                    const arrowLength = 10;
+                    playCtx.fillStyle = "yellow";
+                    playCtx.beginPath();
+                    playCtx.moveTo(endX, endY);
+                    playCtx.lineTo(
+                        endX - arrowLength * Math.cos(arrowAngle - Math.PI / 6),
+                        endY - arrowLength * Math.sin(arrowAngle - Math.PI / 6)
+                    );
+                    playCtx.lineTo(
+                        endX - arrowLength * Math.cos(arrowAngle + Math.PI / 6),
+                        endY - arrowLength * Math.sin(arrowAngle + Math.PI / 6)
+                    );
+                    playCtx.closePath();
+                    playCtx.fill();
+
+                    // === Label spacing fix ===
+                    playCtx.fillStyle = "white";
+                    playCtx.textAlign = "center";
+                    playCtx.font = "16px Arial";
+
+                    const labelYOffsetAbove = -2;  // space for above curves
+                    const labelYOffsetBelow = 1;  // extra space for below curves
+
+                    // Decide curve direction
+                    if (from.x < to.x || (from.x === to.x && from.y < to.y)) {
+                        // Curve below
+                        playCtx.fillText(symbol, midX + normX, midY + normY + labelYOffsetBelow);
+                    } else {
+                        // Curve above
+                        playCtx.fillText(symbol, midX + normX, midY + normY - labelYOffsetAbove);
+                    }
+                }
+                else {
+                    // === Straight line ===
+                    playCtx.strokeStyle = "yellow";
+                    playCtx.lineWidth = 2;
+                    playCtx.beginPath();
+                    playCtx.moveTo(startX, startY);
+                    playCtx.lineTo(endX, endY);
+                    playCtx.stroke();
+
+                    // Arrowhead
+                    const arrowLength = 10;
+                    playCtx.fillStyle = "yellow";
+                    playCtx.beginPath();
+                    playCtx.moveTo(endX, endY);
+                    playCtx.lineTo(
+                        endX - arrowLength * Math.cos(angle - Math.PI / 6),
+                        endY - arrowLength * Math.sin(angle - Math.PI / 6)
+                    );
+                    playCtx.lineTo(
+                        endX - arrowLength * Math.cos(angle + Math.PI / 6),
+                        endY - arrowLength * Math.sin(angle + Math.PI / 6)
+                    );
+                    playCtx.closePath();
+                    playCtx.fill();
+
+                    // Label
+                    playCtx.fillStyle = "white";
+                    playCtx.textAlign = "center";
+                    playCtx.font = "16px Arial";
+                    const textOffset = 10;
+                    playCtx.fillText(symbol, (startX + endX) / 2, (startY + endY) / 2 - textOffset);
+                }
+            }
+        });
+    }
+}
+
+// ==== Load DFA from dropdown ====
+playDropdown.addEventListener("change", () => {
+    const selectedName = playDropdown.value;
+    if (!savedDFAs[selectedName]) return;
+
+    currentDFA = JSON.parse(JSON.stringify(savedDFAs[selectedName]));
+
+    // Map states
+    playStates = currentDFA.states.map(s => ({
+        name: s.name,
+        x: s.x,
+        y: s.y,
+        isStart: s.isStart || false,
+        isFinal: s.isFinal || false
+    }));
+
+    // Map transitions to these state objects
+    playTransitions = currentDFA.transitions.map(t => ({
+        from: playStates.find(st => st.name === t.from.name),
+        to: playStates.find(st => st.name === t.to.name),
+        symbol: t.symbol
+    }));
+
+    drawPlayAll();
+});
+
+const inputField = document.getElementById("inputString");
+const startBtn = document.getElementById("strDFA");
+
+let currentInput = "";
+let currentIndex = 0;
+let activeState = null;
+let dfaInterval = null;
+
+//Moving states
+function stepDFA() {
+    if (!currentInput) return;
+
+    if (currentIndex >= currentInput.length) {
+        clearInterval(dfaInterval);
+        if (activeState.isFinal) alert("String accepted ✅");
+        else alert("String rejected ❌");
+        return;
+    }
+
+    const symbol = currentInput[currentIndex];
+    const nextTransition = playTransitions.find(t => t.from.name === activeState.name && t.symbol === symbol);
+    if (!nextTransition) {
+        clearInterval(dfaInterval);
+        alert(`Rejected at character "${symbol}"`);
+        return;
+    }
+
+    activeState = nextTransition.to;
+    currentIndex++;
+    drawPlayAll();
+    highlightActiveState(activeState);
+}
+
+//Highlighting the Active State
+let pulseTime = 0;
+function highlightActiveState(state) {
+    const radius = 35 + 5 * Math.sin(pulseTime);
+    playCtx.beginPath();
+    playCtx.arc(state.x, state.y, radius, 0, Math.PI * 2);
+    playCtx.strokeStyle = "red";
+    playCtx.lineWidth = 3;
+    playCtx.stroke();
+    pulseTime += 0.2;
+}
+
+
+// Start dfa
+function startDFA() {
+    if (!currentDFA) return alert("Select a DFA first!");
+    const inputStr = inputField.value.trim();
+    if (!inputStr) return alert("Enter an input string.");
+
+    // Validate characters
+    const invalidChars = [...inputStr].filter(c => !currentDFA.alphabet.includes(c));
+    if (invalidChars.length > 0) {
+        alert(`Invalid input character(s): ${invalidChars.join(", ")}`);
+        return;
+    }
+
+    currentInput = inputStr;
+    currentIndex = 0;
+    activeState = playStates.find(s => s.isStart);
+    drawPlayAll();
+    highlightActiveState(activeState);
+}
+startBtn.addEventListener("click", () => {
+    startDFA();
+    clearInterval(dfaInterval);
+    dfaInterval = setInterval(stepDFA, 500); // start auto-run immediately
+});
+
+// Run button
+document.getElementById("runDFA").addEventListener("click", () => {
+    clearInterval(dfaInterval);
+    dfaInterval = setInterval(stepDFA, 500); // adjust speed
+});
+
+// Pause button
+document.getElementById("pauDFA").addEventListener("click", () => {
+    clearInterval(dfaInterval);
+});
