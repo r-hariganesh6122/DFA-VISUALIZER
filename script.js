@@ -739,6 +739,11 @@ document.getElementById("deleteDFABtn").addEventListener("click", () => {
     }
 });
 
+//Back Button
+document.getElementById("backGameBtn").addEventListener("click", () => {
+    gamePage.style.display = "none";
+    firstPage.style.display = "flex"; // show first page
+});
 
 
 // Initial draw
@@ -1098,4 +1103,10 @@ document.getElementById("runDFA").addEventListener("click", () => {
 // Pause button
 document.getElementById("pauDFA").addEventListener("click", () => {
     clearInterval(dfaInterval);
+});
+
+//Back Button
+document.getElementById("backPlayBtn").addEventListener("click", () => {
+    playPage.style.display = "none";
+    firstPage.style.display = "flex"; // show first page
 });
