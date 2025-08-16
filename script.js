@@ -666,6 +666,7 @@ loadDropdown.addEventListener("change", () => {
             symbol: t.symbol
         }));
         alphabet = new Set(dfaCopy.alphabet || []);
+        recomputeStateCountFromNames();
     } else {
         // Load as new DFA (clone so original stays untouched)
         states = dfaCopy.states.map(s => ({ ...s, isStart: !!s.isStart, isFinal: !!s.isFinal }));
@@ -1043,7 +1044,11 @@ function stepDFA() {
     }
 
     const symbol = currentInput[currentIndex];
-    const nextTransition = playTransitions.find(t => t.from.name === activeState.name && t.symbol === symbol);
+    const nextTransition = playTransitions.find(t =>
+        t.from.name === activeState.name &&
+        t.symbol.split(',').map(s => s.trim()).includes(symbol)
+    );
+
     if (!nextTransition) {
         clearInterval(dfaInterval);
         alert(`Rejected at character "${symbol}"`);
