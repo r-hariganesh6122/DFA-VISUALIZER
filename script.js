@@ -19,6 +19,8 @@ let toggleFinalMode = false;
 const addTransitionBtn = document.getElementById("addTransitionBtn");
 const deleteStateBtn = document.getElementById("deleteStateBtn");
 const deleteTransitionBtn = document.getElementById("deleteTransitionBtn");
+const toggleFinalBtn = document.getElementById("toggleFinalBtn");
+const setStartBtn = document.getElementById("setStartBtn");
 
 //---Get Alphabet from User ---
 let alphabet = new Set();
