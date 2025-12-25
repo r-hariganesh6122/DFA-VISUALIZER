@@ -117,73 +117,72 @@ const textOffset = 10; // Distance between label and line/curve
 const curveGap = 30; // Base gap for reverse curve stacking
 
 // Draw all transitions and states together
-function drawAll() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawTransitions();
-  drawStates();
+function drawAll(drawCtx = ctx, drawCanvas = canvas, statesArray = states, transitionsArray = transitions, curveGapParam = curveGap) {
+  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+  drawTransitions(drawCtx, transitionsArray, curveGapParam);
+  drawStates(drawCtx, statesArray);
 }
+// Generic draw functions reused for both build and play canvases
+function drawStates(drawCtx, statesArray) {
+  statesArray.forEach((state) => {
+    drawCtx.beginPath();
+    drawCtx.arc(state.x, state.y, 30, 0, Math.PI * 2);
+    drawCtx.fillStyle = "#222";
+    drawCtx.fill();
+    drawCtx.strokeStyle = "#fff";
+    drawCtx.lineWidth = 2;
+    drawCtx.stroke();
+    drawCtx.fillStyle = "#fff";
+    drawCtx.font = "16px Arial";
+    drawCtx.textAlign = "center";
+    drawCtx.textBaseline = "middle";
+    drawCtx.fillText(state.name, state.x, state.y);
 
-// Draw states
-function drawStates() {
-  states.forEach((state) => {
-    ctx.beginPath();
-    ctx.arc(state.x, state.y, 30, 0, Math.PI * 2);
-    ctx.fillStyle = "#222";
-    ctx.fill();
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = "#fff";
-    ctx.font = "16px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(state.name, state.x, state.y);
     // Start state arrow (before circle)
     if (state.isStart) {
-      ctx.strokeStyle = "green";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(state.x - 50, state.y);
-      ctx.lineTo(state.x - 30, state.y);
-      ctx.stroke();
+      drawCtx.strokeStyle = "green";
+      drawCtx.lineWidth = 3;
+      drawCtx.beginPath();
+      drawCtx.moveTo(state.x - 50, state.y);
+      drawCtx.lineTo(state.x - 30, state.y);
+      drawCtx.stroke();
       // Little arrow head
-      ctx.beginPath();
-      ctx.moveTo(state.x - 30, state.y);
-      ctx.lineTo(state.x - 35, state.y - 5);
-      ctx.lineTo(state.x - 35, state.y + 5);
-      ctx.closePath();
-      ctx.fillStyle = "green";
-      ctx.fill();
+      drawCtx.beginPath();
+      drawCtx.moveTo(state.x - 30, state.y);
+      drawCtx.lineTo(state.x - 35, state.y - 5);
+      drawCtx.lineTo(state.x - 35, state.y + 5);
+      drawCtx.closePath();
+      drawCtx.fillStyle = "green";
+      drawCtx.fill();
     }
 
     // Final state double circle
     if (state.isFinal) {
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(state.x, state.y, 25, 0, Math.PI * 2);
-      ctx.stroke();
+      drawCtx.strokeStyle = "#fff";
+      drawCtx.lineWidth = 2;
+      drawCtx.beginPath();
+      drawCtx.arc(state.x, state.y, 25, 0, Math.PI * 2);
+      drawCtx.stroke();
     }
   });
 }
 
-// Draw transitions with proper reverse handling
-function drawTransitions() {
-  transitions.forEach((tr) => {
+function drawTransitions(drawCtx, transitionsArray, curveGapParam) {
+  transitionsArray.forEach((tr) => {
     const from = tr.from;
     const to = tr.to;
     const symbol = tr.symbol;
 
     if (from === to) {
-      // === Self-loop ===
+      // Self-loop
       const radius = 20;
       const loopOffsetY = 40;
 
-      ctx.strokeStyle = "yellow";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(from.x, from.y - loopOffsetY, radius, 0, Math.PI * 2);
-      ctx.stroke();
+      drawCtx.strokeStyle = "yellow";
+      drawCtx.lineWidth = 2;
+      drawCtx.beginPath();
+      drawCtx.arc(from.x, from.y - loopOffsetY, radius, 0, Math.PI * 2);
+      drawCtx.stroke();
 
       // Arrowhead for self-loop
       const angle = Math.PI / 4;
@@ -194,25 +193,25 @@ function drawTransitions() {
       const arrowAngle = Math.atan2(dy, dx);
       const arrowLength = 10;
 
-      ctx.fillStyle = "yellow";
-      ctx.beginPath();
-      ctx.moveTo(arrowTipX, arrowTipY);
-      ctx.lineTo(
+      drawCtx.fillStyle = "yellow";
+      drawCtx.beginPath();
+      drawCtx.moveTo(arrowTipX, arrowTipY);
+      drawCtx.lineTo(
         arrowTipX - arrowLength * Math.cos(arrowAngle - Math.PI / 6),
         arrowTipY - arrowLength * Math.sin(arrowAngle - Math.PI / 6)
       );
-      ctx.lineTo(
+      drawCtx.lineTo(
         arrowTipX - arrowLength * Math.cos(arrowAngle + Math.PI / 6),
         arrowTipY - arrowLength * Math.sin(arrowAngle + Math.PI / 6)
       );
-      ctx.closePath();
-      ctx.fill();
+      drawCtx.closePath();
+      drawCtx.fill();
 
       // Label for self-loop
-      ctx.fillStyle = "white";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(symbol, from.x, from.y - loopOffsetY - radius - 10);
+      drawCtx.fillStyle = "white";
+      drawCtx.font = "16px Arial";
+      drawCtx.textAlign = "center";
+      drawCtx.fillText(symbol, from.x, from.y - loopOffsetY - radius - 10);
     } else {
       const dx = to.x - from.x;
       const dy = to.y - from.y;
@@ -224,99 +223,88 @@ function drawTransitions() {
       const endY = to.y - 30 * Math.sin(angle);
 
       // Reverse transition detection
-      let reverseCount = transitions.filter(
+      let reverseCount = transitionsArray.filter(
         (t) => t.from === to && t.to === from
       ).length;
 
       if (reverseCount > 0) {
-        // === Curved line for reverse transition ===
         const midX = (startX + endX) / 2;
         const midY = (startY + endY) / 2;
 
         const perpX = -(endY - startY);
         const perpY = endX - startX;
-        const length = Math.sqrt(perpX * perpX + perpY * perpY);
-        const normX = (perpX / length) * curveGap * reverseCount;
-        const normY = (perpY / length) * curveGap * reverseCount;
+        const length = Math.sqrt(perpX * perpX + perpY * perpY) || 1;
+        const normX = (perpX / length) * curveGapParam * reverseCount;
+        const normY = (perpY / length) * curveGapParam * reverseCount;
 
-        ctx.strokeStyle = "yellow";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.quadraticCurveTo(midX + normX, midY + normY, endX, endY);
-        ctx.stroke();
+        drawCtx.strokeStyle = "yellow";
+        drawCtx.lineWidth = 2;
+        drawCtx.beginPath();
+        drawCtx.moveTo(startX, startY);
+        drawCtx.quadraticCurveTo(midX + normX, midY + normY, endX, endY);
+        drawCtx.stroke();
 
         // Arrowhead for curve
-        const arrowAngle = Math.atan2(
-          endY - (midY + normY),
-          endX - (midX + normX)
-        );
+        const arrowAngle = Math.atan2(endY - (midY + normY), endX - (midX + normX));
         const arrowLength = 10;
-        ctx.fillStyle = "yellow";
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(
+        drawCtx.fillStyle = "yellow";
+        drawCtx.beginPath();
+        drawCtx.moveTo(endX, endY);
+        drawCtx.lineTo(
           endX - arrowLength * Math.cos(arrowAngle - Math.PI / 6),
           endY - arrowLength * Math.sin(arrowAngle - Math.PI / 6)
         );
-        ctx.lineTo(
+        drawCtx.lineTo(
           endX - arrowLength * Math.cos(arrowAngle + Math.PI / 6),
           endY - arrowLength * Math.sin(arrowAngle + Math.PI / 6)
         );
-        ctx.closePath();
-        ctx.fill();
+        drawCtx.closePath();
+        drawCtx.fill();
 
-        // === Label spacing fix ===
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.font = "16px Arial";
+        // Label spacing
+        drawCtx.fillStyle = "white";
+        drawCtx.textAlign = "center";
+        drawCtx.font = "16px Arial";
 
-        const labelYOffsetAbove = -2; // space for above curves
-        const labelYOffsetBelow = 1; // extra space for below curves
+        const labelYOffsetAbove = -2;
+        const labelYOffsetBelow = 1;
 
-        // Decide curve direction
         if (from.x < to.x || (from.x === to.x && from.y < to.y)) {
-          // Curve below
-          ctx.fillText(symbol, midX + normX, midY + normY + labelYOffsetBelow);
+          drawCtx.fillText(symbol, midX + normX, midY + normY + labelYOffsetBelow);
         } else {
-          // Curve above
-          ctx.fillText(symbol, midX + normX, midY + normY - labelYOffsetAbove);
+          drawCtx.fillText(symbol, midX + normX, midY + normY - labelYOffsetAbove);
         }
       } else {
-        // === Straight line ===
-        ctx.strokeStyle = "yellow";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
+        // Straight line
+        drawCtx.strokeStyle = "yellow";
+        drawCtx.lineWidth = 2;
+        drawCtx.beginPath();
+        drawCtx.moveTo(startX, startY);
+        drawCtx.lineTo(endX, endY);
+        drawCtx.stroke();
 
         // Arrowhead
         const arrowLength = 10;
-        ctx.fillStyle = "yellow";
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(
+        drawCtx.fillStyle = "yellow";
+        drawCtx.beginPath();
+        drawCtx.moveTo(endX, endY);
+        drawCtx.lineTo(
           endX - arrowLength * Math.cos(angle - Math.PI / 6),
           endY - arrowLength * Math.sin(angle - Math.PI / 6)
         );
-        ctx.lineTo(
+        drawCtx.lineTo(
           endX - arrowLength * Math.cos(angle + Math.PI / 6),
           endY - arrowLength * Math.sin(angle + Math.PI / 6)
         );
-        ctx.closePath();
-        ctx.fill();
+        drawCtx.closePath();
+        drawCtx.fill();
 
         // Label
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.font = "16px Arial";
-        const textOffset = 10;
-        ctx.fillText(
-          symbol,
-          (startX + endX) / 2,
-          (startY + endY) / 2 - textOffset
-        );
+        drawCtx.fillStyle = "white";
+        drawCtx.textAlign = "center";
+        drawCtx.font = "16px Arial";
+        const textOffsetLocal = 10;
+        drawCtx.fillText(symbol, (startX + endX) / 2, (startY + endY) / 2 - textOffsetLocal);
       }
     }
   });
@@ -820,234 +808,6 @@ function updatePlayDropdown() {
   }
 }
 
-// ==== Draw Functions ====
-function drawPlayAll() {
-  playCtx.clearRect(0, 0, playCanvas.width, playCanvas.height);
-  drawPlayTransitions();
-  drawPlayStates();
-}
-
-function drawPlayStates() {
-  playStates.forEach((state) => {
-    playCtx.beginPath();
-    playCtx.arc(state.x, state.y, 30, 0, Math.PI * 2);
-    playCtx.fillStyle = "#222";
-    playCtx.fill();
-    playCtx.strokeStyle = "#fff";
-    playCtx.lineWidth = 2;
-    playCtx.stroke();
-    playCtx.fillStyle = "#fff";
-    playCtx.font = "16px Arial";
-    playCtx.textAlign = "center";
-    playCtx.textBaseline = "middle";
-    playCtx.fillText(state.name, state.x, state.y);
-    // Start state arrow (before circle)
-    if (state.isStart) {
-      playCtx.strokeStyle = "green";
-      playCtx.lineWidth = 3;
-      playCtx.beginPath();
-      playCtx.moveTo(state.x - 50, state.y);
-      playCtx.lineTo(state.x - 30, state.y);
-      playCtx.stroke();
-      // Little arrow head
-      playCtx.beginPath();
-      playCtx.moveTo(state.x - 30, state.y);
-      playCtx.lineTo(state.x - 35, state.y - 5);
-      playCtx.lineTo(state.x - 35, state.y + 5);
-      playCtx.closePath();
-      playCtx.fillStyle = "green";
-      playCtx.fill();
-    }
-
-    // Final state double circle
-    if (state.isFinal) {
-      playCtx.strokeStyle = "#fff";
-      playCtx.lineWidth = 2;
-      playCtx.beginPath();
-      playCtx.arc(state.x, state.y, 25, 0, Math.PI * 2);
-      playCtx.stroke();
-    }
-  });
-}
-
-function drawPlayTransitions() {
-  // Group transitions by from->to pair
-  const grouped = {};
-
-  playTransitions.forEach((tr) => {
-    const key = `${tr.from.name}->${tr.to.name}`;
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(tr);
-  });
-
-  for (const key in grouped) {
-    const trs = grouped[key];
-    trs.forEach((tr, i) => {
-      const from = tr.from;
-      const to = tr.to;
-      const symbol = tr.symbol;
-
-      const dx = to.x - from.x;
-      const dy = to.y - from.y;
-      const angle = Math.atan2(dy, dx);
-
-      if (from === to) {
-        // === Self-loop ===
-        const radius = 20;
-        const loopOffsetY = 40;
-
-        playCtx.strokeStyle = "yellow";
-        playCtx.lineWidth = 2;
-        playCtx.beginPath();
-        playCtx.arc(from.x, from.y - loopOffsetY, radius, 0, Math.PI * 2);
-        playCtx.stroke();
-
-        // Arrowhead for self-loop
-        const angle = Math.PI / 4;
-        const arrowTipX = from.x + radius * Math.cos(angle);
-        const arrowTipY = from.y - loopOffsetY + radius * Math.sin(angle);
-        const dx = from.x - arrowTipX;
-        const dy = from.y - arrowTipY;
-        const arrowAngle = Math.atan2(dy, dx);
-        const arrowLength = 10;
-
-        playCtx.fillStyle = "yellow";
-        playCtx.beginPath();
-        playCtx.moveTo(arrowTipX, arrowTipY);
-        playCtx.lineTo(
-          arrowTipX - arrowLength * Math.cos(arrowAngle - Math.PI / 6),
-          arrowTipY - arrowLength * Math.sin(arrowAngle - Math.PI / 6)
-        );
-        playCtx.lineTo(
-          arrowTipX - arrowLength * Math.cos(arrowAngle + Math.PI / 6),
-          arrowTipY - arrowLength * Math.sin(arrowAngle + Math.PI / 6)
-        );
-        playCtx.closePath();
-        playCtx.fill();
-
-        // Label for self-loop
-        playCtx.fillStyle = "white";
-        playCtx.font = "16px Arial";
-        playCtx.textAlign = "center";
-        playCtx.fillText(symbol, from.x, from.y - loopOffsetY - radius - 10);
-      } else {
-        const dx = to.x - from.x;
-        const dy = to.y - from.y;
-        const angle = Math.atan2(dy, dx);
-
-        const startX = from.x + 30 * Math.cos(angle);
-        const startY = from.y + 30 * Math.sin(angle);
-        const endX = to.x - 30 * Math.cos(angle);
-        const endY = to.y - 30 * Math.sin(angle);
-
-        // Reverse transition detection
-        let reverseCount = playTransitions.filter(
-          (t) => t.from === to && t.to === from
-        ).length;
-
-        if (reverseCount > 0) {
-          // === Curved line for reverse transition ===
-          const midX = (startX + endX) / 2;
-          const midY = (startY + endY) / 2;
-
-          const perpX = -(endY - startY);
-          const perpY = endX - startX;
-          const length = Math.sqrt(perpX * perpX + perpY * perpY);
-          const normX = (perpX / length) * PcurveGap * reverseCount;
-          const normY = (perpY / length) * PcurveGap * reverseCount;
-
-          playCtx.strokeStyle = "yellow";
-          playCtx.lineWidth = 2;
-          playCtx.beginPath();
-          playCtx.moveTo(startX, startY);
-          playCtx.quadraticCurveTo(midX + normX, midY + normY, endX, endY);
-          playCtx.stroke();
-
-          // Arrowhead for curve
-          const arrowAngle = Math.atan2(
-            endY - (midY + normY),
-            endX - (midX + normX)
-          );
-          const arrowLength = 10;
-          playCtx.fillStyle = "yellow";
-          playCtx.beginPath();
-          playCtx.moveTo(endX, endY);
-          playCtx.lineTo(
-            endX - arrowLength * Math.cos(arrowAngle - Math.PI / 6),
-            endY - arrowLength * Math.sin(arrowAngle - Math.PI / 6)
-          );
-          playCtx.lineTo(
-            endX - arrowLength * Math.cos(arrowAngle + Math.PI / 6),
-            endY - arrowLength * Math.sin(arrowAngle + Math.PI / 6)
-          );
-          playCtx.closePath();
-          playCtx.fill();
-
-          // === Label spacing fix ===
-          playCtx.fillStyle = "white";
-          playCtx.textAlign = "center";
-          playCtx.font = "16px Arial";
-
-          const labelYOffsetAbove = -2; // space for above curves
-          const labelYOffsetBelow = 1; // extra space for below curves
-
-          // Decide curve direction
-          if (from.x < to.x || (from.x === to.x && from.y < to.y)) {
-            // Curve below
-            playCtx.fillText(
-              symbol,
-              midX + normX,
-              midY + normY + labelYOffsetBelow
-            );
-          } else {
-            // Curve above
-            playCtx.fillText(
-              symbol,
-              midX + normX,
-              midY + normY - labelYOffsetAbove
-            );
-          }
-        } else {
-          // === Straight line ===
-          playCtx.strokeStyle = "yellow";
-          playCtx.lineWidth = 2;
-          playCtx.beginPath();
-          playCtx.moveTo(startX, startY);
-          playCtx.lineTo(endX, endY);
-          playCtx.stroke();
-
-          // Arrowhead
-          const arrowLength = 10;
-          playCtx.fillStyle = "yellow";
-          playCtx.beginPath();
-          playCtx.moveTo(endX, endY);
-          playCtx.lineTo(
-            endX - arrowLength * Math.cos(angle - Math.PI / 6),
-            endY - arrowLength * Math.sin(angle - Math.PI / 6)
-          );
-          playCtx.lineTo(
-            endX - arrowLength * Math.cos(angle + Math.PI / 6),
-            endY - arrowLength * Math.sin(angle + Math.PI / 6)
-          );
-          playCtx.closePath();
-          playCtx.fill();
-
-          // Label
-          playCtx.fillStyle = "white";
-          playCtx.textAlign = "center";
-          playCtx.font = "16px Arial";
-          const textOffset = 10;
-          playCtx.fillText(
-            symbol,
-            (startX + endX) / 2,
-            (startY + endY) / 2 - textOffset
-          );
-        }
-      }
-    });
-  }
-}
-
 // ==== Load DFA from dropdown ====
 playDropdown.addEventListener("change", () => {
   const selectedName = playDropdown.value;
@@ -1071,7 +831,7 @@ playDropdown.addEventListener("change", () => {
     symbol: t.symbol,
   }));
 
-  drawPlayAll();
+  drawAll(playCtx, playCanvas, playStates, playTransitions, PcurveGap);
 });
 
 const inputField = document.getElementById("inputString");
@@ -1111,7 +871,7 @@ function stepDFA() {
 
   activeState = nextTransition.to;
   currentIndex++;
-  drawPlayAll();
+  drawAll(playCtx, playCanvas, playStates, playTransitions, PcurveGap);
   highlightActiveState(activeState);
 }
 
@@ -1145,7 +905,7 @@ function startDFA() {
   currentInput = inputStr;
   currentIndex = 0;
   activeState = playStates.find((s) => s.isStart);
-  drawPlayAll();
+  drawAll(playCtx, playCanvas, playStates, playTransitions, PcurveGap);
   highlightActiveState(activeState);
 }
 startBtn.addEventListener("click", () => {
