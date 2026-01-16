@@ -1,72 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DFA Builder Game</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
+  <body>
     <!-- First Page -->
     <div id="firstPage">
-        <h1>DFA Builder Game</h1>
-        <button id="buildBtn">Build DFA</button>
-        <button id="playBtn">Walk DFA</button>
-
+      <h1>DFA Builder Game</h1>
+      <button id="buildBtn">Build DFA</button>
+      <button id="playBtn">Walk DFA</button>
     </div>
 
     <!-- Game Page -->
     <div id="gamePage">
-        <div id="controls">
-            <button id="addStateBtn">Add State</button>
-            <button id="addTransitionBtn">Add Transition</button>
-            <button id="deleteStateBtn">Delete State</button>
-            <button id="deleteTransitionBtn">Delete Transition</button>
-            <button id="setStartBtn">Set Start State</button>
-            <button id="toggleFinalBtn">Set Final States</button>
-            <button id="clearBtn">Clear</button>
-        </div>
-        <div id="dfaControls">
-            <button id="backGameBtn">Back</button>
-            <button id="setAlphabetBtn">Set Alphabet</button>
-            <button id="newDFABtn">New DFA</button>
-            <select id="loadDFADropdown">
-                <option value="" disabled selected>Load DFA</option>
-            </select>
-            <button id="saveDFABtn">Save DFA</button>
-            <button id="deleteDFABtn">Delete DFA</button>
-        </div>
+      <div id="controls">
+        <button id="addStateBtn">Add State</button>
+        <button id="addTransitionBtn">Add Transition</button>
+        <button id="deleteStateBtn">Delete State</button>
+        <button id="deleteTransitionBtn">Delete Transition</button>
+        <button id="setStartBtn">Set Start State</button>
+        <button id="toggleFinalBtn">Set Final States</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+      <div id="dfaControls">
+        <button id="backGameBtn">Back</button>
+        <button id="setAlphabetBtn">Set Alphabet</button>
+        <button id="newDFABtn">New DFA</button>
+        <select id="loadDFADropdown">
+          <option value="" disabled selected>Load DFA</option>
+        </select>
+        <button id="saveDFABtn">Save DFA</button>
+        <button id="deleteDFABtn">Delete DFA</button>`
+      </div>
 
-        <canvas id="dfaCanvas" width="1000" height="600"></canvas>
+      <canvas id="dfaCanvas" width="1000" height="600"></canvas>
     </div>
 
     <!-- Walk Page -->
     <div id="playPage">
-        <!-- Top controls -->
-        <div id="Pcontrols">
-            <select id="selectDFADropdown">
-                <option value="" disabled selected>Select DFA</option>
-            </select>
-            <input type="text" id="inputString" placeholder="Enter input string">
-            <button id="strDFA">Start DFA</button>
-            <button id="pauDFA">Pause DFA</button>
-            <button id="runDFA">Run DFA</button>
-        </div>
-        <div id="dfaPControls">
-            <button id="backPlayBtn">Back</button>
-        </div>
+      <!-- Top controls -->
+      <div id="Pcontrols">
+        <select id="selectDFADropdown">
+          <option value="" disabled selected>Select DFA</option>
+        </select>
+        <input type="text" id="inputString" placeholder="Enter input string" />
+        <button id="strDFA">Start DFA</button>
+        <button id="pauDFA">Pause DFA</button>
+        <button id="runDFA">Run DFA</button>
+      </div>
+      <div id="dfaPControls">
+        <button id="backPlayBtn">Back</button>
+      </div>
 
-        <!-- Canvas to visualize DFA traversal -->
-        <canvas id="playCanvas" width="1000" height="600"></canvas>
+      <!-- Canvas to visualize DFA traversal -->
+      <canvas id="playCanvas" width="1000" height="600"></canvas>
 
-        <!-- Result display -->
-        <div id="result" style="margin-top: 20px; color: #fff; font-size: 1.2rem;"></div>
+      <!-- Result display -->
+      <div
+        id="result"
+        style="margin-top: 20px; color: #fff; font-size: 1.2rem"
+      ></div>
     </div>
 
-
     <script src="script.js"></script>
-</body>
-
+  </body>
 </html>
